@@ -48,7 +48,7 @@ export default class Main extends React.Component<Props, State> {
         return;
       }
       this.song.setNumberOfLoops(-1);
-      // this.song.play();
+      this.song.play();
     });
   }
 
@@ -62,11 +62,7 @@ export default class Main extends React.Component<Props, State> {
 
   public componentDidUpdate() {
     if (this.state.shipVerticalPosition <= MIN_HEIGHT + 1) {
-      clearInterval(this.interval);
-      Alert.alert('Serenity has crashed', 'Everybody is dead', [
-        {text: 'Retry', onPress: this.reset},
-        {text: 'I accept our fate'},
-      ]);
+      this.crash();
     }
   }
 
@@ -196,6 +192,15 @@ export default class Main extends React.Component<Props, State> {
     );
   };
 
+  protected crash = () => {
+    clearInterval(this.interval);
+    this.song.stop();
+    Alert.alert('Serenity has crashed', 'Everybody is dead', [
+      {text: 'Retry', onPress: this.reset},
+      {text: 'I accept our fate'},
+    ]);
+  };
+
   protected fly = (): void => {
     if (this.isAwake()) {
       this.setState(prevState => ({
@@ -208,7 +213,7 @@ export default class Main extends React.Component<Props, State> {
 
   protected incrementTime = (): void => {
     this.setState(prevState => ({
-      bordom: Math.min(prevState.bordom + 5, MAX_BORED),
+      bordom: Math.min(prevState.bordom + 10, MAX_BORED),
       shipHorizontalPosition:
         (prevState.shipHorizontalPosition + 10) %
         Dimensions.get('window').width,
