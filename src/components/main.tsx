@@ -44,7 +44,6 @@ export default class Main extends React.Component<Props, State> {
     Sound.setCategory('Playback');
     this.song = new Sound('mals_song.mp3', Sound.MAIN_BUNDLE, error => {
       if (error) {
-        console.log(error);
         return;
       }
       this.song.setNumberOfLoops(-1);
@@ -183,7 +182,8 @@ export default class Main extends React.Component<Props, State> {
                 <Image
                   resizeMode="contain"
                   source={require('../res/zzz.jpg')}
-                  style={style.sleepImage}></Image>
+                  style={style.sleepImage}
+                />
               </TouchableWithoutFeedback>
             )}
           </ImageBackground>
@@ -194,7 +194,7 @@ export default class Main extends React.Component<Props, State> {
 
   protected crash = () => {
     clearInterval(this.interval);
-    this.song.stop();
+    this.stopMusic();
     Alert.alert('Serenity has crashed', 'Everybody is dead', [
       {text: 'Retry', onPress: this.reset},
       {text: 'I accept our fate'},
@@ -225,6 +225,15 @@ export default class Main extends React.Component<Props, State> {
     return this.state.bordom < MAX_BORED;
   };
 
+  protected stopMusic = (i: number = 0.8) => {
+    this.song.setVolume(i);
+    if (i > 0.05) {
+      setTimeout(() => this.stopMusic(i * 0.8), 100);
+    } else {
+      this.song.stop();
+    }
+  };
+
   protected play = (): void => {
     if (this.isAwake()) {
       this.setState(prevState => ({
@@ -236,6 +245,7 @@ export default class Main extends React.Component<Props, State> {
   };
 
   protected reset = () => {
+    this.song.setVolume(1);
     this.setState({...this.initialState}, this.setTimeIncrement);
   };
 
