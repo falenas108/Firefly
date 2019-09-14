@@ -10,6 +10,7 @@ import {
   ImageSourcePropType,
   Dimensions,
   Alert,
+  AppState,
 } from 'react-native';
 import style from './main.style';
 import Sound from 'react-native-sound';
@@ -53,10 +54,12 @@ export default class Main extends React.Component<Props, State> {
 
   public componentDidMount() {
     this.setTimeIncrement();
+    AppState.addEventListener('change', this.handleAppStateChange);
   }
 
   public componentWillUnmount() {
     clearInterval(this.interval);
+    AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
   public componentDidUpdate() {
@@ -208,6 +211,15 @@ export default class Main extends React.Component<Props, State> {
       }));
     } else {
       this.setIsSleepingMessageVisible();
+    }
+  };
+
+  protected handleAppStateChange = (currentAppState: string) => {
+    if (currentAppState == 'background') {
+      this.song.pause();
+    }
+    if (currentAppState == 'active') {
+      this.song.play();
     }
   };
 
