@@ -47,7 +47,7 @@ export default class Main extends React.Component<Props, State> {
         return;
       }
       this.song.setNumberOfLoops(-1);
-      this.song.play();
+      this.startSong();
     });
   }
 
@@ -192,9 +192,9 @@ export default class Main extends React.Component<Props, State> {
     );
   };
 
-  protected crash = () => {
+  protected crash = async () => {
     clearInterval(this.interval);
-    this.stopMusic();
+    await this.stopMusic();
     Alert.alert('Serenity has crashed', 'Everybody is dead', [
       {text: 'Retry', onPress: this.reset},
       {text: 'I accept our fate'},
@@ -225,13 +225,16 @@ export default class Main extends React.Component<Props, State> {
     return this.state.bordom < MAX_BORED;
   };
 
-  protected stopMusic = (i: number = 0.8) => {
-    this.song.setVolume(i);
-    if (i > 0.05) {
-      setTimeout(() => this.stopMusic(i * 0.8), 100);
-    } else {
-      this.song.stop();
-    }
+  protected stopMusic = async (i: number = 0.8) => {
+    new Promise(resolve => {
+      this.song.setVolume(i);
+      if (i > 0.05) {
+        setTimeout(() => this.stopMusic(i * 0.8), 100);
+      } else {
+        this.song.stop();
+        resolve();
+      }
+    });
   };
 
   protected play = (): void => {
@@ -245,11 +248,19 @@ export default class Main extends React.Component<Props, State> {
   };
 
   protected reset = () => {
-    this.song.setVolume(1);
-    this.setState({...this.initialState}, this.setTimeIncrement);
+    this.setState({...this.initialState}, () => {
+      this.setTimeIncrement();
+      this.startSong();
+    });
   };
 
   protected setIsSleepingMessageVisible = () => {
     this.setState({isSleepingMessageVisible: true});
+  };
+
+  protected startSong = () => {
+    this.song.setVolume(1);
+    this.song.setCurrentTime(3);
+    this.song.play();
   };
 }
